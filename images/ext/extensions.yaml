@@ -39,7 +39,7 @@ pg_repack:
 
 hypopg:
   package: postgresql-18-hypopg
-  version: 1.4.4-1.pgdg13+1
+  version: 1.4.5-1.pgdg13+1
   upgrade: alter
   upstream: https://github.com/HypoPG/hypopg
 
