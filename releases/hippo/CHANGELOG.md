@@ -1,3 +1,29 @@
+## hippo@0.1.2
+
+### Update lock file images/base/requirements.lock ([#45](https://github.com/nicebots-xyz/hippo/pull/45))
+
+
+
+### Upgrade dependency psycopg to v3.3.7 ([#47](https://github.com/nicebots-xyz/hippo/pull/47))
+
+
+
+### Package changes
+
+<details>
+<summary>8 packages changed in the image</summary>
+
+- `certifi` (pip): 2026.10.19 → 2026.10.23
+- `dnspython` (pip): 2.9.0 → 2.9.1
+- `psycopg` (pip): 3.3.6 → 3.3.7
+- `py-consul` (pip): 1.7.1 → 1.8.0
+- `python-dateutil` (pip): 2.9.0.post0 → 4.0.0
+- `six` (pip): 1.17.0 (removed)
+- `tzdata` (pip): 2026.6 (added)
+- `wcwidth` (pip): 0.9.3 → 0.9.4
+
+</details>
+
 ## hippo@0.1.1
 
 ### Passwords ignore a trailing newline in the secrets ([#27](https://github.com/nicebots-xyz/hippo/pull/27))
