@@ -1,13 +1,21 @@
 core:changelogs:
-  - content: "---\npackages:\n  hippo:\n    type: minor\n---\n\n### Members are named after their node, not their task slot\n\n`deploy/stack.yml` named members and their volumes after the Swarm task slot (`pg-1`, `pgdata-1`). Swarm can move a slot to another node but a local volume stays behind, so a member could restart on an empty volume or on a stale copy left by an earlier placement, and stale etcd members could roll the cluster state back. Members are now `pg-<host>` and `etcd-<host>`, each node keeps one `hippo_pgdata` and one `hippo_etcd-data` volume, and the stack needs `HIPPO_NODE_1`, `HIPPO_NODE_2` and `HIPPO_NODE_3` set to the hostnames of the `hippo.pg=true` nodes. The stack's config key is now `patroni_v3`.\n\n**Breaking.** To migrate a running cluster:\n\n1. Note which `pgdata-<slot>` each node's running `pg` task uses: `docker service ps hippo_pg` lists `hippo_pg.<slot>` per node.\n2. `docker stack rm hippo` and wait for the tasks to stop.\n3. On each node, copy that volume: `docker run --rm -u 0 -v pgdata-<slot>:/from -v hippo_pgdata:/to \"$HIPPO_IMAGE\" cp -a /from/. /to/`. etcd starts empty, since its member names change, and Patroni rebuilds its state in etcd from the data directories.\n4. Deploy with the new variables. Once `patronictl list` shows a leader and two streaming replicas, remove the old `pgdata-*` and `etcd-data-*` volumes on every node.\n"
-    filename: node-bound-members.md
+  - content: "---\npackages:\n  hippo:\n    type: patch\n---\n\n### Upgrade PostgreSQL to 18.7\n\n**Security.** 18.7 fixes 52 CVEs ([announcement](https://www.postgresql.org/about/news/postgresql-187-1712-1616-1520-1425-and-19-rc-2-released-3442/)). The most severe let a role that can create objects run code as the operating system user running the server: SQL-language function output type confusion (CVE-2026-18447), statistics import type confusion (CVE-2026-116329, 18 only) and dropped-column type confusion (CVE-2026-120142). Others let dblink and subscriptions append to arbitrary files (CVE-2026-14661) and bypass row security through `INSERT ... ON CONFLICT` (CVE-2026-120154). Redeploy with the new image.\n\nNo dump or restore is needed, but 18.7 fixes several index bugs whose damage it does not repair. After upgrading, reindex `contrib/pg_trgm` `gist_trgm_ops` indexes and B-tree indexes on unconstrained `bpchar` columns, and reindex any GIN index you suspect is affected (CVE-2026-116336). See the [18.7 release notes](https://www.postgresql.org/docs/18/release-18-7.html).\n"
+    filename: postgres-18.7.md
+    v: 0.0.0
+  - content: "---\npackages:\n  hippo: patch\n---\n\n### Package changes\n\n<details>\n<summary>12 packages changed in the image</summary>\n\n- `apt` (deb): 3.0.3 → 3.0.4\n- `libapparmor1` (deb): 4.1.0-1 (added)\n- `libapt-pkg7.0` (deb): 3.0.3 → 3.0.4\n- `libpq5` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `libsystemd-shared` (deb): 257.13-1~deb13u1 (added)\n- `postgresql-18` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `postgresql-18-jit` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `postgresql-client-18` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `postgresql-client-common` (deb): 293.pgdg13+1 → 294.pgdg13+2\n- `postgresql-common` (deb): 293.pgdg13+1 → 294.pgdg13+2\n- `systemd` (deb): 257.13-1~deb13u1 (added)\n- `tzdata` (deb): 2026e-0+deb13u1 → 2026f-0+deb13u1\n\n</details>\n"
+    filename: hippo-package-changes.md
+    v: 0.0.0
+  - content: "---\npackages:\n  hippo-ext: patch\n---\n\n### Package changes\n\n<details>\n<summary>12 packages changed in the image</summary>\n\n- `apt` (deb): 3.0.3 → 3.0.4\n- `libapparmor1` (deb): 4.1.0-1 (added)\n- `libapt-pkg7.0` (deb): 3.0.3 → 3.0.4\n- `libpq5` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `libsystemd-shared` (deb): 257.13-1~deb13u1 (added)\n- `postgresql-18` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `postgresql-18-jit` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `postgresql-client-18` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `postgresql-client-common` (deb): 293.pgdg13+1 → 294.pgdg13+2\n- `postgresql-common` (deb): 293.pgdg13+1 → 294.pgdg13+2\n- `systemd` (deb): 257.13-1~deb13u1 (added)\n- `tzdata` (deb): 2026e-0+deb13u1 → 2026f-0+deb13u1\n\n</details>\n"
+    filename: hippo-ext-package-changes.md
     v: 0.0.0
 core:packages:
   - changelogIds:
-      - node-bound-members.md
+      - postgres-18.7.md
+      - hippo-package-changes.md
     id: release:hippo
     updated: true
   - changelogIds:
-      - node-bound-members.md
+      - postgres-18.7.md
+      - hippo-ext-package-changes.md
     id: release:hippo-ext
     updated: true
