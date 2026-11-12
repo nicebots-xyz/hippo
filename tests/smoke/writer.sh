@@ -4,7 +4,7 @@
 # Inserts one row every 0.25s through two paths (libpq multi-host, HAProxy) and records the id of every
 # acknowledged and every failed insert in /tmp/<acked|failed>-<path>. Once /tmp/stop exists it prints the
 # totals and idles, so run.sh can read the id files and compare them with the table.
-DIRECT="host=pg-1,pg-2,pg-3 dbname=postgres user=postgres connect_timeout=2 target_session_attrs=read-write"
+DIRECT="host=pg-lab1,pg-lab2,pg-lab3 dbname=postgres user=postgres connect_timeout=2 target_session_attrs=read-write"
 VIAHA="host=tasks.haproxy port=5000 dbname=postgres user=postgres connect_timeout=2"
 until psql "$DIRECT" -qc "create table if not exists smoke(path text, n int)" 2>/dev/null; do sleep 1; done
 i=0; okd=0; okh=0; fd=0; fh=0
