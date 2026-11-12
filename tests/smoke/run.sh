@@ -104,7 +104,8 @@ import json, sys
 print(" ".join(sorted(m["Member"] for m in json.load(sys.stdin))))')
 [ "$members" = "pg-lab1 pg-lab2 pg-lab3" ] || fail "members after the rolling update: $members"
 for n in 1 2 3; do
-  vols=$(docker exec hippo-lab$n docker volume ls -q | sort | tr '\n' ' ')
+  # Anonymous volumes (64 hex digits) come from the base image's VOLUME, not from the stack.
+  vols=$(docker exec hippo-lab$n docker volume ls -q | grep -vE '^[0-9a-f]{64}$' | sort | tr '\n' ' ')
   [ "$vols" = "hippo_etcd-data hippo_pgdata " ] || fail "volumes on lab$n: $vols"
 done
 log "members are named after their node, one volume per service on each node"
