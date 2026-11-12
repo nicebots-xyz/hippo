@@ -1,30 +1,13 @@
 core:changelogs:
-  - content: "---\npackages:\n  hippo:\n    type: patch\n---\n\n### Update lock file images/base/requirements.lock\n"
-    filename: renovate-pip-compile-refresh.md
-    v: 0.0.0
-  - content: "---\npackages:\n  hippo:\n    type: patch\n---\n\n### Upgrade dependency psycopg to v3.3.7\n"
-    filename: renovate-psycopg-3.x.md
-    v: 0.0.0
-  - content: "---\npackages:\n  hippo: patch\n---\n\n### Package changes\n\n<details>\n<summary>8 packages changed in the image</summary>\n\n- `certifi` (pip): 2026.10.19 → 2026.10.23\n- `dnspython` (pip): 2.9.0 → 2.9.1\n- `psycopg` (pip): 3.3.6 → 3.3.7\n- `py-consul` (pip): 1.7.1 → 1.8.0\n- `python-dateutil` (pip): 2.9.0.post0 → 4.0.0\n- `six` (pip): 1.17.0 (removed)\n- `tzdata` (pip): 2026.6 (added)\n- `wcwidth` (pip): 0.9.3 → 0.9.4\n\n</details>\n"
-    filename: hippo-package-changes.md
-    v: 0.0.0
-  - content: "---\npackages:\n  hippo-ext:\n    type: patch\n---\n\n### Upgrade dependency postgresql-18-hypopg to v1.4.5-1.pgdg13+1\n\n- hypopg 1.4.4 → 1.4.5 ([release notes](https://github.com/HypoPG/hypopg/releases))\n"
-    filename: renovate-pgdg-extensions-needs-alter-extension.md
-    v: 0.0.0
-  - content: "---\npackages:\n  hippo-ext: patch\n---\n\n### Package changes\n\n<details>\n<summary>9 packages changed in the image</summary>\n\n- `postgresql-18-hypopg` (deb): 1.4.4-1.pgdg13+1 → 1.4.5-1.pgdg13+1\n- `certifi` (pip): 2026.10.19 → 2026.10.23\n- `dnspython` (pip): 2.9.0 → 2.9.1\n- `psycopg` (pip): 3.3.6 → 3.3.7\n- `py-consul` (pip): 1.7.1 → 1.8.0\n- `python-dateutil` (pip): 2.9.0.post0 → 4.0.0\n- `six` (pip): 1.17.0 (removed)\n- `tzdata` (pip): 2026.6 (added)\n- `wcwidth` (pip): 0.9.3 → 0.9.4\n\n</details>\n"
-    filename: hippo-ext-package-changes.md
+  - content: "---\npackages:\n  hippo:\n    type: minor\n---\n\n### Members are named after their node, not their task slot\n\n`deploy/stack.yml` named members and their volumes after the Swarm task slot (`pg-1`, `pgdata-1`). Swarm can move a slot to another node but a local volume stays behind, so a member could restart on an empty volume or on a stale copy left by an earlier placement, and stale etcd members could roll the cluster state back. Members are now `pg-<host>` and `etcd-<host>`, each node keeps one `hippo_pgdata` and one `hippo_etcd-data` volume, and the stack needs `HIPPO_NODE_1`, `HIPPO_NODE_2` and `HIPPO_NODE_3` set to the hostnames of the `hippo.pg=true` nodes. The stack's config key is now `patroni_v3`.\n\n**Breaking.** To migrate a running cluster:\n\n1. Note which `pgdata-<slot>` each node's running `pg` task uses: `docker service ps hippo_pg` lists `hippo_pg.<slot>` per node.\n2. `docker stack rm hippo` and wait for the tasks to stop.\n3. On each node, copy that volume: `docker run --rm -u 0 -v pgdata-<slot>:/from -v hippo_pgdata:/to \"$HIPPO_IMAGE\" cp -a /from/. /to/`. etcd starts empty, since its member names change, and Patroni rebuilds its state in etcd from the data directories.\n4. Deploy with the new variables. Once `patronictl list` shows a leader and two streaming replicas, remove the old `pgdata-*` and `etcd-data-*` volumes on every node.\n"
+    filename: node-bound-members.md
     v: 0.0.0
 core:packages:
   - changelogIds:
-      - renovate-pip-compile-refresh.md
-      - renovate-psycopg-3.x.md
-      - hippo-package-changes.md
+      - node-bound-members.md
     id: release:hippo
     updated: true
   - changelogIds:
-      - renovate-pgdg-extensions-needs-alter-extension.md
-      - renovate-pip-compile-refresh.md
-      - renovate-psycopg-3.x.md
-      - hippo-ext-package-changes.md
+      - node-bound-members.md
     id: release:hippo-ext
     updated: true
