@@ -1,3 +1,16 @@
+## hippo-ext@0.2.0
+
+### Members are named after their node, not their task slot ([#53](https://github.com/nicebots-xyz/hippo/pull/53))
+
+`deploy/stack.yml` named members and their volumes after the Swarm task slot (`pg-1`, `pgdata-1`). Swarm can move a slot to another node but a local volume stays behind, so a member could restart on an empty volume or on a stale copy left by an earlier placement, and stale etcd members could roll the cluster state back. Members are now `pg-<host>` and `etcd-<host>`, each node keeps one `hippo_pgdata` and one `hippo_etcd-data` volume, and the stack needs `HIPPO_NODE_1`, `HIPPO_NODE_2` and `HIPPO_NODE_3` set to the hostnames of the `hippo.pg=true` nodes. The stack's config key is now `patroni_v3`.
+
+**Breaking.** To migrate a running cluster:
+
+1. Note which `pgdata-<slot>` each node's running `pg` task uses: `docker service ps hippo_pg` lists `hippo_pg.<slot>` per node.
+2. `docker stack rm hippo` and wait for the tasks to stop.
+3. On each node, copy that volume: `docker run --rm -u 0 -v pgdata-<slot>:/from -v hippo_pgdata:/to "$HIPPO_IMAGE" cp -a /from/. /to/`. etcd starts empty, since its member names change, and Patroni rebuilds its state in etcd from the data directories.
+4. Deploy with the new variables. Once `patronictl list` shows a leader and two streaming replicas, remove the old `pgdata-*` and `etcd-data-*` volumes on every node.
+
 ## hippo-ext@0.1.2
 
 ### Upgrade dependency postgresql-18-hypopg to v1.4.5-1.pgdg13+1 ([#44](https://github.com/nicebots-xyz/hippo/pull/44))
