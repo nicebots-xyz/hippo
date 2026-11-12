@@ -65,17 +65,25 @@ export HIPPO_IMAGE=ghcr.io/nicebots-xyz/hippo@$(docker buildx imagetools inspect
 ```
 
 ```bash
+export HIPPO_NODE_1=<host> HIPPO_NODE_2=<host> HIPPO_NODE_3=<host>
+```
+
+```bash
 docker stack deploy -c stack.yml hippo
 ```
 
 | Variable | Default |
 |---|---|
 | `HIPPO_IMAGE` | required |
+| `HIPPO_NODE_1`, `HIPPO_NODE_2`, `HIPPO_NODE_3` | required, the hostnames of the `hippo.pg=true` nodes |
 | `HIPPO_SUBNET` | `10.77.0.0/24` |
 | `HIPPO_NETWORK` | `hippo` |
 | `HIPPO_CLIENT_NETWORK` | `hippo-clients` |
 | `HIPPO_SUPERUSER_SECRET` | `hippo_superuser_password_v1` |
 | `HIPPO_REPLICATION_SECRET` | `hippo_replication_password_v1` |
+
+Each member is named after its node (`pg-<host>`, `etcd-<host>`) and keeps its data in that node's
+`hippo_pgdata` and `hippo_etcd-data` volumes.
 
 Updating means redeploying with a new `HIPPO_IMAGE`. PostgreSQL settings live in etcd after bootstrap
 and are changed with `patronictl edit-config`.

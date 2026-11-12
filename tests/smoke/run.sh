@@ -3,10 +3,11 @@
 # Copyright: 2026 NiceBots.xyz
 # Smoke test: deploys deploy/stack.yml on a throwaway 3-node dind swarm with the given hippo image,
 # forces a rolling update of every Postgres member under write load, and checks that:
-#   - the templated member hostnames resolve,
+#   - the member hostnames, derived from the node hostnames, resolve,
 #   - an app on hippo-clients reaches the primary through HAProxy, and no member of the cluster directly,
 #   - only members can call Patroni's state-changing REST endpoints,
-#   - the cluster converges back to 1 leader + 2 streaming replicas,
+#   - the cluster converges back to 1 leader + 2 streaming replicas, each member still named after its node and
+#     every node holding exactly one volume per service,
 #   - every write acknowledged to the client (libpq multi-host and HAProxy) is in the table, once,
 #     and the table holds nothing that was not attempted. A write whose attempt failed may or may not
 #     have committed (the connection can drop after the commit, before the acknowledgement).
@@ -61,14 +62,16 @@ for f in stack.yml patroni.yml.tmpl haproxy.cfg; do node_in sh -c "cat > /deploy
 SUPERUSER_PW=$(openssl rand -hex 16)
 printf '%s' "$SUPERUSER_PW" | node_in docker secret create hippo_superuser_password_v1 - >/dev/null
 openssl rand -hex 16 | tr -d '\n' | node_in docker secret create hippo_replication_password_v1 - >/dev/null
-quiet node sh -c "cd /deploy && HIPPO_IMAGE=$IMAGE docker stack deploy --detach=true -c stack.yml hippo"
+# The node hostnames set by swarm-up.sh.
+NODES="HIPPO_NODE_1=lab1 HIPPO_NODE_2=lab2 HIPPO_NODE_3=lab3"
+quiet node sh -c "cd /deploy && HIPPO_IMAGE=$IMAGE $NODES docker stack deploy --detach=true -c stack.yml hippo"
 
 wait_for 300 "the cluster to converge" converged
 log "cluster converged"
 
 # Swarm publishes a task's names once it is healthy, which can trail convergence by a healthcheck interval.
 resolves() { svc hippo_pg getent hosts "$1"; }
-for h in pg-1 pg-2 pg-3 etcd-1 etcd-2 etcd-3; do
+for h in pg-lab1 pg-lab2 pg-lab3 etcd-lab1 etcd-lab2 etcd-lab3; do
   wait_for 60 "member hostname $h to resolve" resolves "$h"
 done
 log "member hostnames resolve"
@@ -77,7 +80,7 @@ log "member hostnames resolve"
 client() { node docker run --rm --network hippo-clients -e PGPASSWORD="$SUPERUSER_PW" "$IMAGE" "$@"; }
 wait_for 60 "an app on hippo-clients to reach the primary through HAProxy" \
   client psql "host=tasks.haproxy port=5000 dbname=postgres user=postgres connect_timeout=5" -Atc "select 1"
-for h in pg-1 etcd-1; do
+for h in pg-lab1 etcd-lab1; do
   if client getent hosts "$h" >/dev/null 2>&1; then fail "$h resolves on hippo-clients"; fi
 done
 log "apps on hippo-clients reach Postgres through HAProxy only"
@@ -95,12 +98,23 @@ quiet node docker service update --force --quiet hippo_pg
 wait_for 300 "the cluster to converge after the rolling update" converged
 log "cluster converged after rolling update"
 
+# Members are named after their node, so a rescheduled task never mounts another member's (or a stale) volume.
+members=$(svc hippo_pg patronictl -c /etc/patroni.yml list -f json | python3 -c '
+import json, sys
+print(" ".join(sorted(m["Member"] for m in json.load(sys.stdin))))')
+[ "$members" = "pg-lab1 pg-lab2 pg-lab3" ] || fail "members after the rolling update: $members"
+for n in 1 2 3; do
+  vols=$(docker exec hippo-lab$n docker volume ls -q | sort | tr '\n' ' ')
+  [ "$vols" = "hippo_etcd-data hippo_pgdata " ] || fail "volumes on lab$n: $vols"
+done
+log "members are named after their node, one volume per service on each node"
+
 # Checked after the update, when every member has a new address.
 quiet svc hippo_pg patronictl -c /etc/patroni.yml reload hippo --force
 svc smoke_writer python3 -c '
 import urllib.error, urllib.request
 try:
-    urllib.request.urlopen(urllib.request.Request("http://pg-1:8008/reload", method="POST"), timeout=5)
+    urllib.request.urlopen(urllib.request.Request("http://pg-lab1:8008/reload", method="POST"), timeout=5)
 except urllib.error.HTTPError as e:
     raise SystemExit(e.code != 403)
 raise SystemExit(1)' || fail "a non-member called Patroni's POST /reload without being refused"
