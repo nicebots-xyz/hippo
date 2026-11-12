@@ -1,3 +1,31 @@
+## hippo@0.2.1
+
+### Upgrade PostgreSQL to 18.7 ([#55](https://github.com/nicebots-xyz/hippo/pull/55))
+
+**Security.** 18.7 fixes 52 CVEs ([announcement](https://www.postgresql.org/about/news/postgresql-187-1712-1616-1520-1425-and-19-rc-2-released-3442/)). The most severe let a role that can create objects run code as the operating system user running the server: SQL-language function output type confusion (CVE-2026-18447), statistics import type confusion (CVE-2026-116329, 18 only) and dropped-column type confusion (CVE-2026-120142). Others let dblink and subscriptions append to arbitrary files (CVE-2026-14661) and bypass row security through `INSERT ... ON CONFLICT` (CVE-2026-120154). Redeploy with the new image.
+
+No dump or restore is needed, but 18.7 fixes several index bugs whose damage it does not repair. After upgrading, reindex `contrib/pg_trgm` `gist_trgm_ops` indexes and B-tree indexes on unconstrained `bpchar` columns, and reindex any GIN index you suspect is affected (CVE-2026-116336). See the [18.7 release notes](https://www.postgresql.org/docs/18/release-18-7.html).
+
+### Package changes
+
+<details>
+<summary>12 packages changed in the image</summary>
+
+- `apt` (deb): 3.0.3 → 3.0.4
+- `libapparmor1` (deb): 4.1.0-1 (added)
+- `libapt-pkg7.0` (deb): 3.0.3 → 3.0.4
+- `libpq5` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2
+- `libsystemd-shared` (deb): 257.13-1~deb13u1 (added)
+- `postgresql-18` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2
+- `postgresql-18-jit` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2
+- `postgresql-client-18` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2
+- `postgresql-client-common` (deb): 293.pgdg13+1 → 294.pgdg13+2
+- `postgresql-common` (deb): 293.pgdg13+1 → 294.pgdg13+2
+- `systemd` (deb): 257.13-1~deb13u1 (added)
+- `tzdata` (deb): 2026e-0+deb13u1 → 2026f-0+deb13u1
+
+</details>
+
 ## hippo@0.2.0
 
 ### Members are named after their node, not their task slot ([#53](https://github.com/nicebots-xyz/hippo/pull/53))
