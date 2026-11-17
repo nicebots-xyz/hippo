@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: nicebots-xyz/licensor/.github/actions/setup-licensor@a5893a8a480981ea21cb25cedcb0302616e8b859 # v0.1.2
+      - uses: nicebots-xyz/licensor/.github/actions/setup-licensor@577188f94866994b07577a82aae6d59680427d8d # v0.2.1
 
       - name: Check license headers
         run: licensor check --ignore ".*" -- *
