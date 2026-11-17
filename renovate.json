@@ -2,18 +2,8 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>nicebots-xyz/renovate-config",
-    "local>nicebots-xyz/renovate-config:automerge-python-lockfile"
-  ],
-  "platformAutomerge": false,
-  "ignorePaths": [
-    "**/node_modules/**",
-    "**/bower_components/**",
-    "**/vendor/**",
-    "**/examples/**",
-    "**/__tests__/**",
-    "**/test/**",
-    "**/tests/**",
-    "**/__fixtures__/**"
+    "local>nicebots-xyz/renovate-config:automerge-python-lockfile",
+    "local>nicebots-xyz/renovate-config:automerge-low-risk"
   ],
   "ignoreDeps": ["hippo-base"],
   "pip-compile": {
@@ -35,14 +25,6 @@
     },
     {
       "customType": "regex",
-      "description": "Tool versions installed by actions, annotated with a `# renovate:` comment (e.g. licensor's release next to its setup action).",
-      "managerFilePatterns": ["/^\\.github/workflows/[^/]+\\.ya?ml$/"],
-      "matchStrings": [
-        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n\\s+version: (?<currentValue>\\S+)"
-      ]
-    },
-    {
-      "customType": "regex",
       "description": "Container images run by workflows, annotated with `# renovate: datasource=docker` (e.g. the SBOM scanner).",
       "managerFilePatterns": ["/^\\.github/workflows/[^/]+\\.ya?ml$/"],
       "matchStrings": [
@@ -60,18 +42,6 @@
     }
   ],
   "packageRules": [
-    {
-      "description": "Cooldown wherever the source gives release timestamps.",
-      "matchDatasources": ["docker", "github-releases", "github-tags"],
-      "minimumReleaseAge": "5 days",
-      "internalChecksFilter": "strict"
-    },
-    {
-      "description": "Same cooldown as the lock file (uv --exclude-newer P7D), so Renovate never proposes a release uv refuses to lock.",
-      "matchDatasources": ["pypi"],
-      "minimumReleaseAge": "7 days",
-      "internalChecksFilter": "strict"
-    },
     {
       "description": "PostgreSQL majors are separate image lines and need pg_upgrade: never proposed.",
       "matchPackageNames": ["postgres"],
@@ -98,26 +68,6 @@
       "addLabels": ["deps:pgdg"]
     },
     {
-      "description": "Low-risk updates merge themselves once every check is green.",
-      "matchUpdateTypes": ["patch", "digest", "pinDigest"],
-      "automerge": true
-    },
-    {
-      "matchManagers": ["github-actions"],
-      "matchUpdateTypes": ["minor"],
-      "automerge": true
-    },
-    {
-      "description": "The licensor action and the release it installs move together.",
-      "matchPackageNames": ["nicebots-xyz/licensor"],
-      "groupName": "licensor"
-    },
-    {
-      "description": "Tegami is young and the release plugins use its barely documented plugin API: always reviewed.",
-      "matchPackageNames": ["tegami"],
-      "automerge": false
-    },
-    {
       "description": "Where an update lands, as a label: the image build (Dockerfiles, Patroni's Python dependencies).",
       "matchFileNames": ["images/*/Dockerfile", "images/base/requirements.{in,lock}"],
       "addLabels": ["area:image"]
@@ -136,17 +86,6 @@
       "description": "CI and release tooling: workflows, the tools they run, Tegami.",
       "matchFileNames": [".github/**", "package.json", "pnpm-lock.yaml"],
       "addLabels": ["area:ci"]
-    },
-    {
-      "description": "Lock file maintenance PRs name their lock file: each lock file already gets a PR of its own.",
-      "matchUpdateTypes": ["lockFileMaintenance"],
-      "matchManagers": ["pip-compile"],
-      "commitMessageTopic": "images/base/requirements.lock"
-    },
-    {
-      "matchUpdateTypes": ["lockFileMaintenance"],
-      "matchManagers": ["npm"],
-      "commitMessageTopic": "pnpm-lock.yaml"
     },
     {
       "description": "Extensions that may need ALTER EXTENSION … UPDATE: separate PR, reviewed by hand until the image can run the update itself.",
