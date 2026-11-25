@@ -133,7 +133,7 @@ services:
       update_config: {parallelism: 1, order: stop-first, delay: 10s, failure_action: pause}
 
   haproxy:
-    image: haproxy:3.4.7-alpine
+    image: haproxy:3.4.8-alpine
     networks: [hippo, clients]
     configs:
       - source: haproxy_v1
