@@ -1,3 +1,31 @@
+## hippo-ext@0.2.2
+
+### Upgrade docker/dockerfile docker tag to v1.29.0 ([#59](https://github.com/nicebots-xyz/hippo/pull/59))
+
+
+
+### Upgrade dependency etcd-io/etcd to v3.7.4 ([#64](https://github.com/nicebots-xyz/hippo/pull/64))
+
+
+
+### Upgrade haproxy docker tag to v3.4.8 ([#65](https://github.com/nicebots-xyz/hippo/pull/65))
+
+
+
+### Update python lock file ([#62](https://github.com/nicebots-xyz/hippo/pull/62))
+
+
+
+### Package changes
+
+<details>
+<summary>2 packages changed in the image</summary>
+
+- `click` (pip): 8.5.0 → 8.5.1
+- `dnspython` (pip): 2.9.1 → 2.9.2
+
+</details>
+
 ## hippo-ext@0.2.1
 
 ### Upgrade PostgreSQL to 18.7 ([#55](https://github.com/nicebots-xyz/hippo/pull/55))
