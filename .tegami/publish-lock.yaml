@@ -1,21 +1,36 @@
 core:changelogs:
-  - content: "---\npackages:\n  hippo:\n    type: patch\n---\n\n### Upgrade PostgreSQL to 18.7\n\n**Security.** 18.7 fixes 52 CVEs ([announcement](https://www.postgresql.org/about/news/postgresql-187-1712-1616-1520-1425-and-19-rc-2-released-3442/)). The most severe let a role that can create objects run code as the operating system user running the server: SQL-language function output type confusion (CVE-2026-18447), statistics import type confusion (CVE-2026-116329, 18 only) and dropped-column type confusion (CVE-2026-120142). Others let dblink and subscriptions append to arbitrary files (CVE-2026-14661) and bypass row security through `INSERT ... ON CONFLICT` (CVE-2026-120154). Redeploy with the new image.\n\nNo dump or restore is needed, but 18.7 fixes several index bugs whose damage it does not repair. After upgrading, reindex `contrib/pg_trgm` `gist_trgm_ops` indexes and B-tree indexes on unconstrained `bpchar` columns, and reindex any GIN index you suspect is affected (CVE-2026-116336). See the [18.7 release notes](https://www.postgresql.org/docs/18/release-18-7.html).\n"
-    filename: postgres-18.7.md
+  - content: "---\npackages:\n  hippo:\n    type: patch\n---\n\n### Upgrade docker/dockerfile docker tag to v1.29.0\n"
+    filename: renovate-docker-dockerfile-1.x.md
     v: 0.0.0
-  - content: "---\npackages:\n  hippo: patch\n---\n\n### Package changes\n\n<details>\n<summary>12 packages changed in the image</summary>\n\n- `apt` (deb): 3.0.3 → 3.0.4\n- `libapparmor1` (deb): 4.1.0-1 (added)\n- `libapt-pkg7.0` (deb): 3.0.3 → 3.0.4\n- `libpq5` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `libsystemd-shared` (deb): 257.13-1~deb13u1 (added)\n- `postgresql-18` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `postgresql-18-jit` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `postgresql-client-18` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `postgresql-client-common` (deb): 293.pgdg13+1 → 294.pgdg13+2\n- `postgresql-common` (deb): 293.pgdg13+1 → 294.pgdg13+2\n- `systemd` (deb): 257.13-1~deb13u1 (added)\n- `tzdata` (deb): 2026e-0+deb13u1 → 2026f-0+deb13u1\n\n</details>\n"
+  - content: "---\npackages:\n  hippo:\n    type: patch\n---\n\n### Upgrade dependency etcd-io/etcd to v3.7.4\n"
+    filename: renovate-etcd-io-etcd-3.x.md
+    v: 0.0.0
+  - content: "---\npackages:\n  hippo:\n    type: patch\n---\n\n### Upgrade haproxy docker tag to v3.4.8\n"
+    filename: renovate-haproxy-3.x.md
+    v: 0.0.0
+  - content: "---\npackages:\n  hippo:\n    type: patch\n---\n\n### Update python lock file\n"
+    filename: renovate-lock-file-maintenance-pip-compile.md
+    v: 0.0.0
+  - content: "---\npackages:\n  hippo: patch\n---\n\n### Package changes\n\n<details>\n<summary>2 packages changed in the image</summary>\n\n- `click` (pip): 8.5.0 → 8.5.1\n- `dnspython` (pip): 2.9.1 → 2.9.2\n\n</details>\n"
     filename: hippo-package-changes.md
     v: 0.0.0
-  - content: "---\npackages:\n  hippo-ext: patch\n---\n\n### Package changes\n\n<details>\n<summary>12 packages changed in the image</summary>\n\n- `apt` (deb): 3.0.3 → 3.0.4\n- `libapparmor1` (deb): 4.1.0-1 (added)\n- `libapt-pkg7.0` (deb): 3.0.3 → 3.0.4\n- `libpq5` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `libsystemd-shared` (deb): 257.13-1~deb13u1 (added)\n- `postgresql-18` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `postgresql-18-jit` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `postgresql-client-18` (deb): 18.6-1.pgdg13+2 → 18.7-1.pgdg13+2\n- `postgresql-client-common` (deb): 293.pgdg13+1 → 294.pgdg13+2\n- `postgresql-common` (deb): 293.pgdg13+1 → 294.pgdg13+2\n- `systemd` (deb): 257.13-1~deb13u1 (added)\n- `tzdata` (deb): 2026e-0+deb13u1 → 2026f-0+deb13u1\n\n</details>\n"
+  - content: "---\npackages:\n  hippo-ext: patch\n---\n\n### Package changes\n\n<details>\n<summary>2 packages changed in the image</summary>\n\n- `click` (pip): 8.5.0 → 8.5.1\n- `dnspython` (pip): 2.9.1 → 2.9.2\n\n</details>\n"
     filename: hippo-ext-package-changes.md
     v: 0.0.0
 core:packages:
   - changelogIds:
-      - postgres-18.7.md
+      - renovate-docker-dockerfile-1.x.md
+      - renovate-etcd-io-etcd-3.x.md
+      - renovate-haproxy-3.x.md
+      - renovate-lock-file-maintenance-pip-compile.md
       - hippo-package-changes.md
     id: release:hippo
     updated: true
   - changelogIds:
-      - postgres-18.7.md
+      - renovate-docker-dockerfile-1.x.md
+      - renovate-etcd-io-etcd-3.x.md
+      - renovate-haproxy-3.x.md
+      - renovate-lock-file-maintenance-pip-compile.md
       - hippo-ext-package-changes.md
     id: release:hippo-ext
     updated: true
